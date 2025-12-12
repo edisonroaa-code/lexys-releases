@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LexSys PY - Sistema de Gestión Judicial Moderno</title>
+    <link rel="icon" type="image/jpeg" href="assets/logo.jpg">
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css"/>
+
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/calendar.css">
+</head>
+<body>
+
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1150">
+        </div>
+
+    <div id="loading-container" class="d-flex align-items-center justify-content-center vh-100">
+        <div class="text-center">
+            <div class="loader mx-auto"></div>
+            <p class="mt-3 text-muted">Iniciando LexSys...</p>
+        </div>
+    </div>
+
+    <div id="auth-container" class="d-none">
+        <div class="d-flex align-items-center justify-content-center min-vh-100 px-4">
+            <div class="w-100 p-4 p-md-5 rounded-4 shadow-lg" style="max-width: 450px; background-color: var(--bs-tertiary-bg);">
+                <div id="login-view">
+                    <div class="text-center">
+                        <img src="assets/logo.jpg" alt="Logo LexSys PY" style="width: 150px; margin-bottom: 1rem;">
+                        <h2 class="h3">Bienvenido a LexSys PY</h2>
+                        <p class="text-muted">Gestión judicial moderna para su despacho.</p>
+                    </div>
+                    <form id="login-form" class="mt-4 needs-validation" novalidate>
+                        <div class="mb-3">
+                            <label for="login-email" class="form-label">Correo Electrónico</label>
+                            <input id="login-email" type="email" required class="form-control form-control-lg" placeholder="Correo Electrónico">
+                            <div class="invalid-feedback">Ingresa un correo electrónico válido.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="login-password" class="form-label">Contraseña</label>
+                            <input id="login-password" type="password" required class="form-control form-control-lg" placeholder="Contraseña">
+                            <div class="invalid-feedback">La contraseña es obligatoria.</div>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="remember-me">
+                            <label class="form-check-label" for="remember-me">
+                                Recordar sesión
+                            </label>
+                        </div>
+                        <button id="login-button" class="btn btn-primary btn-lg w-100">Iniciar Sesión</button>
+                    </form>
+                    <p class="mt-4 text-center text-muted">¿No tienes cuenta? <a href="#" id="show-signup" class="text-decoration-none fw-bold" style="color: var(--bs-primary);">Regístrate</a></p>
+                </div>
+                <div id="signup-view" class="d-none">
+                     <div class="text-center">
+                        <img src="assets/logo.jpg" alt="Logo LexSys PY" style="width: 150px; margin-bottom: 1rem;">
+                        <h2 class="h3">Crea tu Despacho</h2>
+                        <p class="text-muted">Comienza a gestionar tus casos de forma eficiente.</p>
+                    </div>
+                    <form id="signup-form" class="mt-4 needs-validation" novalidate>
+                        <div class="mb-2">
+                             <label for="signup-name" class="form-label">Nombre Completo</label>
+                            <input id="signup-name" type="text" required class="form-control" placeholder="Nombre Completo">
+                            <div class="invalid-feedback">El nombre es obligatorio.</div>
+                        </div>
+                        <div class="mb-2">
+                            <label for="signup-despacho" class="form-label">Nombre del Despacho</label>
+                            <input id="signup-despacho" type="text" required class="form-control" placeholder="Nombre del Despacho">
+                            <div class="invalid-feedback">El nombre del despacho es obligatorio.</div>
+                        </div>
+                        <div class="mb-2">
+                            <label for="signup-email" class="form-label">Correo Electrónico</label>
+                            <input id="signup-email" type="email" required class="form-control" placeholder="Correo Electrónico">
+                            <div class="invalid-feedback">Ingresa un correo válido.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="signup-password" class="form-label">Contraseña</label>
+                            <input id="signup-password" type="password" required class="form-control" placeholder="Contraseña">
+                            <div class="invalid-feedback">La contraseña es obligatoria.</div>
+                        </div>
+                        <button id="signup-button" class="btn btn-primary btn-lg w-100">Crear Cuenta</button>
+                    </form>
+                    <p class="mt-4 text-center text-muted">¿Ya tienes cuenta? <a href="#" id="show-login" class="text-decoration-none fw-bold" style="color: var(--bs-primary);">Inicia Sesión</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="app-container" class="d-none">
+        <div class="sidebar-overlay"></div>
+        
+        <button class="btn btn-primary mobile-sidebar-toggle d-md-none">
+            <i class="ph ph-list"></i>
+        </button>
+        
+        <div class="d-flex">
+            <aside class="sidebar p-3 d-flex flex-column justify-content-between">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-4 p-2">
+                        <img src="assets/logo.jpg" alt="Logo LexSys PY" style="width: 40px;">
+                        <h1 id="despacho-name" class="h5 mb-0">LexSys PY</h1>
+                    </div>
+                    <nav class="nav flex-column nav-pills">
+                        <a class="nav-link d-flex align-items-center gap-2" href="#" data-view="dashboard" id="nav-dashboard"><i class="ph ph-layout"></i> Dashboard</a>
+                        <a class="nav-link d-flex align-items-center gap-2" href="#" data-view="expedientes" id="nav-expedientes"><i class="ph ph-files"></i> Expedientes</a>
+                        <a class="nav-link d-flex align-items-center gap-2" href="#" data-view="clientes" id="nav-clientes"><i class="ph ph-users"></i> Clientes</a>
+                        <a class="nav-link d-flex align-items-center gap-2" href="#" data-view="calendario" id="nav-calendario"><i class="ph ph-calendar"></i> Calendario</a>
+                        <a class="nav-link d-flex align-items-center gap-2" href="#" data-view="plazos" id="nav-plazos"><i class="ph ph-timer"></i> Plazos Procesales</a>
+                        <a class="nav-link d-flex align-items-center gap-2 d-none" href="#" data-view="admin" id="nav-admin"><i class="ph ph-user-gear"></i> Administración</a>
+                        <a class="nav-link d-flex align-items-center gap-2 d-none" href="#" data-view="admin_juicios" id="nav-admin_juicios"><i class="ph ph-gavel"></i> Config. Juicios</a>
+                    </nav>
+                </div>
+                <div>
+                     <a href="#" id="logout-button" class="nav-link d-flex align-items-center gap-2"><i class="ph ph-sign-out"></i> Cerrar Sesión</a>
+                </div>
+            </aside>
+
+            <main class="flex-grow-1 p-4 overflow-auto" style="height: 100vh;">
+                <header class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h2 id="main-title" class="h2">Dashboard</h2>
+                        <p id="main-subtitle" class="text-muted">Resumen general de su actividad judicial.</p>
+                    </div>
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="dropdown">
+                            <button class="btn btn-link position-relative" id="notification-bell" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="ph ph-bell"></i>
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none" id="notification-count">
+                                    0
+                                </span>
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-end p-2" id="notification-list" style="width: 300px; max-height: 400px; overflow-y: auto;">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h6 class="mb-0">Notificaciones</h6>
+                                    <button class="btn btn-sm btn-link p-0" id="mark-all-read">Marcar todas como leídas</button>
+                                </div>
+                                <div id="notification-items"></div>
+                            </div>
+                        </div>
+                        
+                        <img id="user-avatar" src="https://placehold.co/40x40/e9ecef/495057?text=U" class="rounded-circle border border-2">
+                        <div>
+                            <p id="user-name" class="fw-semibold mb-0">Cargando...</p>
+                            <p id="user-role" class="small text-muted mb-0">...</p>
+                        </div>
+                    </div>
+                </header>
+                
+                <div id="dashboard-view" class="view-container">
+                    <div class="row" id="dashboard-stats">
+                        </div>
+                    
+                    <div class="row">
+                        <div class="col-12 mb-4">
+                            <div class="card border-left-warning shadow h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title d-flex align-items-center"><i class="ph ph-clock-countdown me-2 text-warning"></i>Vencimientos Próximos</h5>
+                                    <div id="dashboard-vencimientos-list">
+                                        </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title d-flex align-items-center"><i class="ph ph-calendar-check me-2"></i>Próximos Eventos</h5>
+                                    <div id="dashboard-eventos-list" style="max-height: 200px; overflow-y: auto;">
+                                        </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title d-flex align-items-center"><i class="ph ph-file-text me-2"></i>?sltimas Actuaciones</h5>
+                                     <div id="dashboard-actuaciones-list" style="max-height: 200px; overflow-y: auto;">
+                                        </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="expedientes-view" class="view-container d-none">
+                    <div class="p-4 rounded-3 card">
+                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3 gap-2">
+                            <h3 class="h5">Todos los Expedientes</h3>
+                            <div class="d-flex gap-2">
+                                <div class="search-container">
+                                    <i class="ph ph-magnifying-glass search-icon"></i>
+                                    <input id="search-expediente" type="text" class="form-control" placeholder="Buscar...">
+                                </div>
+                                <button class="btn btn-primary d-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#nuevoExpedienteModal">
+                                    <i class="ph ph-plus"></i> Nuevo Expediente
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3 g-2" id="expedientes-filters">
+                            <div class="col-md-3">
+                                <select class="form-select" id="filter-estado">
+                                    <option value="">Todos los estados</option>
+                                    <option value="en_curso">En Curso</option>
+                                    <option value="completado">Completado</option>
+                                    <option value="vencido">Vencido</option>
+                                    <option value="pendiente">Pendiente</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <select class="form-select" id="filter-etapa">
+                                    <option value="">Todas las etapas</option>
+                                    </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="filter-fecha-desde" class="form-label visually-hidden">Desde</label>
+                                <input type="date" class="form-control" id="filter-fecha-desde" placeholder="Desde">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="filter-fecha-hasta" class="form-label visually-hidden">Hasta</label>
+                                <input type="date" class="form-control" id="filter-fecha-hasta" placeholder="Hasta">
+                            </div>
+                        </div>
+                        
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Nro.</th><th>Carátula</th><th>Estado</th><th>Etapa Actual</th><th>Fecha Creación</th><th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="expedientes-table-body">
+                                    </tbody>
+                            </table>
+                        </div>
+                        <nav id="expedientes-pagination" class="d-flex justify-content-end mt-3">
+                            <ul class="pagination">
+                                <li class="page-item" id="prev-page-item"><a class="page-link" href="#">Anterior</a></li>
+                                <li class="page-item" id="next-page-item"><a class="page-link" href="#">Siguiente</a></li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+
+                <div id="expediente-detail-view" class="view-container d-none">
+                    <div class="p-4 rounded-3 card">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <h3 id="detail-caratula" class="h5"></h3>
+                                <p id="detail-meta" class="text-muted small"></p>
+                            </div>
+                            <button id="back-to-list-btn" class="btn btn-secondary">Volver a la lista</button>
+                        </div>
+                        
+                        <ul class="nav nav-tabs mb-3" id="expedienteTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="tareas-tab" data-bs-toggle="tab" data-bs-target="#tareas" type="button" role="tab">Tareas</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="actuaciones-tab" data-bs-toggle="tab" data-bs-target="#actuaciones" type="button" role="tab">Actuaciones</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="documentos-tab" data-bs-toggle="tab" data-bs-target="#documentos" type="button" role="tab">Documentos</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="resumen-tab" data-bs-toggle="tab" data-bs-target="#resumen" type="button" role="tab">Resumen</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="linea-tiempo-tab" data-bs-toggle="tab" data-bs-target="#linea-tiempo" type="button" role="tab">Línea de Tiempo</button>
+                            </li>
+                        </ul>
+                        
+                        <div class="tab-content" id="expedienteTabContent">
+                            <div class="tab-pane fade show active" id="tareas" role="tabpanel">
+                                <div id="tareas-list" class="mb-4">
+                                    </div>
+                                <form id="new-tarea-form" class="mb-4">
+                                    <div class="input-group">
+                                        <label for="tarea-descripcion" class="form-label visually-hidden">Descripción de la tarea</label>
+                                        <input type="text" id="tarea-descripcion" class="form-control" placeholder="Añadir nueva tarea..." required>
+                                        <label for="tarea-responsable" class="form-label visually-hidden">Responsable</label>
+                                        <select id="tarea-responsable" class="form-select" style="max-width: 150px;"></select>
+                                        <label for="tarea-fecha-limite" class="form-label visually-hidden">Fecha límite</label>
+                                        <input type="date" id="tarea-fecha-limite" class="form-control" style="max-width: 150px;">
+                                        <button class="btn btn-primary" type="submit">Añadir</button>
+                                    </div>
+                                </form>
+                            </div>
+                            
+                            <div class="tab-pane fade" id="actuaciones" role="tabpanel">
+                                <div id="actuaciones-list" class="mb-4" style="max-height: 400px; overflow-y: auto;"></div>
+                                <hr>
+                                <h6>Añadir Actuación</h6>
+                                <form id="new-actuacion-form">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3"><label for="actuacion-tipo" class="form-label">Tipo</label><select id="actuacion-tipo" class="form-select" required><option>Escrito</option><option>Incidente</option><option>Recurso</option><option>Audiencia</option><option>Sentencia</option><option>Asesoría</option><option>Otro</option></select></div>
+                                        <div class="col-md-6 mb-3"><label for="actuacion-fecha" class="form-label">Fecha</label><input type="date" id="actuacion-fecha" class="form-control" required></div>
+                                    </div>
+                                    <div class="mb-3"><label for="actuacion-descripcion" class="form-label">Descripción</label><textarea id="actuacion-descripcion" class="form-control" rows="3" required></textarea></div>
+                                    <button type="submit" class="btn btn-primary">Guardar Actuación</button>
+                                </form>
+                            </div>
+                            
+                            <div class="tab-pane fade" id="documentos" role="tabpanel">
+                                <h5>Documentos del Expediente</h5>
+                                <form id="upload-expediente-document-form" class="mb-3">
+                                    <div class="input-group">
+                                        <label for="expediente-document-input" class="form-label visually-hidden">Subir documento</label>
+                                        <input type="file" class="form-control" id="expediente-document-input" required>
+                                        <button class="btn btn-success" type="submit" id="upload-expediente-button">
+                                            <i class="ph ph-upload-simple me-1"></i> Subir
+                                        </button>
+                                    </div>
+                                </form>
+                                <div id="expediente-documentos-list">
+                                    </div>
+                            </div>
+                            
+                            <div class="tab-pane fade" id="resumen" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="card mb-3">
+                                            <div class="card-header">Información Básica</div>
+                                            <div class="card-body">
+                                                <p><strong>Número:</strong> <span id="resumen-nro"></span></p>
+                                                <p><strong>Carátula:</strong> <span id="resumen-caratula"></span></p>
+                                                <p><strong>Contraparte:</strong> <span id="resumen-contraparte"></span></p>
+                                                <p><strong>Estado:</strong> <span id="resumen-estado"></span></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="card">
+                                            <div class="card-header">Estadísticas</div>
+                                            <div class="card-body">
+                                                <p><strong>Tareas completadas:</strong> <span id="resumen-tareas-completadas"></span>/<span id="resumen-tareas-totales"></span></p>
+                                                <p><strong>?sltima actuación:</strong> <span id="resumen-ultima-actuacion"></span></p>
+                                                <p><strong>Próximo vencimiento:</strong> <span id="resumen-proximo-vencimiento"></span></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade" id="linea-tiempo" role="tabpanel">
+                                <h5>Línea de Tiempo del Expediente</h5>
+                                <div class="timeline" id="expediente-timeline">
+                                    </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="clientes-view" class="view-container d-none">
+                     <div class="p-4 rounded-3 card">
+                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3 gap-2">
+                            <h3 class="h5">Carpetas de Clientes</h3>
+                             <div class="d-flex gap-2">
+                                <div class="search-container">
+                                    <i class="ph ph-magnifying-glass search-icon"></i>
+                                    <input id="search-cliente" type="text" class="form-control" placeholder="Buscar cliente...">
+                                </div>
+                                <button class="btn btn-primary d-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#nuevoClienteModal">
+                                    <i class="ph ph-plus"></i> Nuevo Cliente
+                                </button>
+                            </div>
+                        </div>
+                        <div id="clientes-folder-container" class="row">
+                            </div>
+                    </div>
+                </div>
+
+                 <div id="cliente-expedientes-view" class="view-container d-none">
+                    <div class="p-4 rounded-3 card">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h3 id="cliente-expediente-title" class="h5"></h3>
+                            <button id="back-to-clients-btn" class="btn btn-secondary">Volver a Clientes</button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Nro.</th><th>Carátula</th><th>Estado</th><th>Etapa Actual</th><th>Fecha Creación</th><th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="cliente-expedientes-table-body">
+                                    </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="p-4 mt-4 rounded-3 card">
+                        <h3 class="h5 mb-3">Documentos del Cliente</h3>
+                        <form id="upload-document-form" class="mb-3">
+                            <div class="input-group">
+                                <label for="document-input" class="form-label visually-hidden">Subir documento</label>
+                                <input type="file" class="form-control" id="document-input" required>
+                                <button class="btn btn-success" type="submit" id="upload-button">
+                                    <i class="ph ph-upload-simple me-1"></i> Subir
+                                </button>
+                            </div>
+                        </form>
+                        <div id="documentos-list">
+                            </div>
+                    </div>
+                </div>
+
+                <div id="calendario-view" class="view-container d-none">
+                    <div class="p-4 rounded-3 card">
+                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3 gap-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <button id="prev-month-btn" class="btn btn-outline-secondary">&lt;</button>
+                                <h3 id="calendar-month-year" class="h5 mb-0"></h3>
+                                <button id="next-month-btn" class="btn btn-outline-secondary">&gt;</button>
+                            </div>
+                            <button class="btn btn-primary d-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#nuevoEventoModal">
+                                <i class="ph ph-plus"></i> Nuevo Evento
+                            </button>
+                        </div>
+                        <div class="d-grid grid-cols-7 text-center fw-bold text-muted mb-2" style="grid-template-columns: repeat(7, 1fr);">
+                            <div>Dom</div><div>Lun</div><div>Mar</div><div>Mié</div><div>Jue</div><div>Vie</div><div>Sáb</div>
+                        </div>
+                        <div id="calendar-grid">
+                            </div>
+                    </div>
+                </div>
+
+                <div id="plazos-view" class="view-container d-none">
+                    <div class="p-4 rounded-3 card">
+                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3 gap-2">
+                            <h3 class="h5">Consulta de Plazos Procesales</h3>
+                            <div class="d-flex flex-wrap gap-2 align-items-center">
+                                <div class="search-container">
+                                    <i class="ph ph-magnifying-glass search-icon"></i>
+                                    <input id="plazos-search-input" type="text" class="form-control" placeholder="Buscar..." style="width: 220px;">
+                                </div>
+                                <select id="plazos-filter-fuero" class="form-select" style="width: 180px;"></select>
+                                <button id="plazos-reset-filters" class="btn btn-outline-secondary">Limpiar</button>
+                                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#nuevoPlazoModal"><i class="ph ph-plus"></i> Nuevo Plazo</button>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Acción / Procedimiento</th>
+                                        <th>Fuero</th>
+                                        <th>Duración</th>
+                                        <th>Artículo</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="plazos-table-body">
+                                    </tbody>
+                            </table>
+                        </div>
+                        <nav id="plazos-pagination" class="d-flex justify-content-end mt-3">
+                            <ul class="pagination">
+                                <li class="page-item" id="plazos-prev-page-item"><a class="page-link" href="#">Anterior</a></li>
+                                <li class="page-item" id="plazos-next-page-item"><a class="page-link" href="#">Siguiente</a></li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+
+                <div id="admin-view" class="view-container d-none">
+                     <div class="p-4 rounded-3 card mb-4">
+                        <h3 class="h5 mb-3">Crear Nuevo Miembro</h3>
+                        <form id="create-user-form" novalidate>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="new-user-name" class="form-label">Nombre Completo</label>
+                                    <input type="text" id="new-user-name" class="form-control" required>
+                                    <div class="invalid-feedback">El nombre es obligatorio.</div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="new-user-email" class="form-label">Correo Electrónico</label>
+                                    <input type="email" id="new-user-email" class="form-control" required>
+                                    <div class="invalid-feedback">Ingresa un correo válido.</div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="new-user-password" class="form-label">Contraseña Temporal</label>
+                                <input type="password" id="new-user-password" class="form-control" required>
+                                <div class="invalid-feedback">La contraseña es obligatoria.</div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Crear Usuario</button>
+                        </form>
+                     </div>
+                     <div class="p-4 rounded-3 card">
+                        <h3 class="h5 mb-3">Miembros del Despacho</h3>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Nombre</th><th>Email</th><th>Rol</th><th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="members-table-body">
+                                    </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="admin_juicios-view" class="view-container d-none">
+                     <div class="p-4 rounded-3 card">
+                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3 gap-2">
+                            <h3 class="h5">Tipos de Juicio</h3>
+                             <div class="d-flex gap-2">
+                                <div class="search-container">
+                                    <i class="ph ph-magnifying-glass search-icon"></i>
+                                    <input id="search-juicio" type="text" class="form-control" placeholder="Buscar tipo de juicio...">
+                                </div>
+                                <button class="btn btn-primary d-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#nuevoJuicioModal">
+                                    <i class="ph ph-plus"></i> Nuevo Tipo
+                                </button>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Nombre</th>
+                                        <th>Área</th>
+                                        <th>Fuero</th>
+                                        <th>Tipo de Proceso</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="juicios-table-body">
+                                    </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+    
+    <div class="modal fade" id="nuevoExpedienteModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Crear Nuevo Expediente</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="new-expediente-form" novalidate>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="exp-cliente" class="form-label">Cliente</label>
+                                <select class="form-select" id="exp-cliente" required></select>
+                                <div class="invalid-feedback">Debe seleccionar un cliente.</div>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="exp-fuero" class="form-label">Fuero</label>
+                                <select class="form-select" id="exp-fuero" required></select>
+                                <div class="invalid-feedback">Debe seleccionar un fuero.</div>
+                            </div>
+                             <div class="col-md-4 mb-3">
+                                <label for="exp-tipo-proceso" class="form-label">Tipo de Proceso</label>
+                                <select class="form-select" id="exp-tipo-proceso" required disabled></select>
+                                <div class="invalid-feedback">Debe seleccionar un tipo de proceso.</div>
+                            </div>
+                             <div class="col-md-4 mb-3">
+                                <label for="exp-tipo-juicio" class="form-label">Tipo de Juicio</label>
+                                <select class="form-select" id="exp-tipo-juicio" required disabled></select>
+                                <div class="invalid-feedback">Debe seleccionar un tipo de juicio.</div>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row">
+                             <div class="col-md-6 mb-3">
+                                <label for="exp-nro" class="form-label">Nro. Expediente</label>
+                                <input type="text" class="form-control" id="exp-nro" required>
+                                <div class="invalid-feedback">El número de expediente es obligatorio.</div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="exp-contraparte" class="form-label">Contraparte</label>
+                                <input type="text" class="form-control" id="exp-contraparte">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="exp-monto" class="form-label">Monto de la Demanda</label>
+                                <input type="text" inputmode="numeric" class="form-control" id="exp-monto" placeholder="Ej: 15000000">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="exp-cuenta" class="form-label">Cuenta Corriente Judicial</label>
+                                <input type="text" class="form-control" id="exp-cuenta" placeholder="Ej: 123456789">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="exp-caratula" class="form-label">Carátula</label>
+                            <textarea class="form-control" id="exp-caratula" rows="3" required></textarea>
+                            <div class="invalid-feedback">La carátula es obligatoria.</div>
+                        </div>
+                        <div class="d-flex justify-content-end gap-2">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary">Guardar y Cerrar</button>
+                            <button type="button" id="save-and-add-another-btn" class="btn btn-success">Guardar y Añadir Otro</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="editarExpedienteModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Editar Expediente</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="edit-expediente-form">
+                        <input type="hidden" id="edit-exp-id">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="edit-exp-nro" class="form-label">Nro. Expediente</label>
+                                <input type="text" class="form-control" id="edit-exp-nro" required>
+                            </div>
+                             <div class="col-md-6 mb-3">
+                                <label for="edit-exp-cliente" class="form-label">Cliente</label>
+                                <select class="form-select" id="edit-exp-cliente" required></select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-exp-caratula" class="form-label">Carátula</label>
+                            <textarea class="form-control" id="edit-exp-caratula" rows="3" required></textarea>
+                        </div>
+                         <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="edit-exp-contraparte" class="form-label">Contraparte</label>
+                                <input type="text" class="form-control" id="edit-exp-contraparte">
+                            </div>
+                             <div class="col-md-6 mb-3">
+                                <label for="edit-exp-estado" class="form-label">Estado</label>
+                                <select class="form-select" id="edit-exp-estado" required>
+                                    <option value="pendiente">Pendiente</option>
+                                    <option value="en_curso">En Curso</option>
+                                    <option value="completado">Completado</option>
+                                    <option value="vencido">Vencido</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="edit-exp-monto" class="form-label">Monto de la Demanda</label>
+                                <input type="text" inputmode="numeric" class="form-control" id="edit-exp-monto">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="edit-exp-cuenta" class="form-label">Cuenta Corriente Judicial</label>
+                                <input type="text" class="form-control" id="edit-exp-cuenta">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-exp-tipo-juicio" class="form-label">Tipo de Juicio</label>
+                            <select class="form-select" id="edit-exp-tipo-juicio" required></select>
+                        </div>
+                        <div class="text-end">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="nuevoClienteModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Crear Nuevo Cliente</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="new-client-form" novalidate>
+                        <div class="mb-3">
+                            <label for="client-nombre" class="form-label">Nombre Completo</label>
+                            <input type="text" id="client-nombre" class="form-control" required>
+                            <div class="invalid-feedback">El nombre es obligatorio.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="client-cedula" class="form-label">Cédula</label>
+                            <input type="text" id="client-cedula" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label for="client-telefono" class="form-label">Teléfono</label>
+                            <input type="text" id="client-telefono" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label for="client-email" class="form-label">Email</label>
+                            <input type="email" id="client-email" class="form-control">
+                        </div>
+                        <div class="text-end">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary">Guardar Cliente</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="nuevoJuicioModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Crear Tipo de Juicio</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="new-juicio-form" novalidate>
+                        <div class="mb-3">
+                            <label for="juicio-nombre" class="form-label">Nombre</label>
+                            <input type="text" id="juicio-nombre" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="juicio-area" class="form-label">Área</label>
+                            <select id="juicio-area" class="form-select">
+                                <option value="">Seleccione un área...</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="juicio-fuero" class="form-label">Fuero</label>
+                            <select id="juicio-fuero" class="form-select">
+                                <option value="">Seleccione un fuero...</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="juicio-proceso" class="form-label">Tipo de Proceso</label>
+                            <input type="text" id="juicio-proceso" class="form-control" placeholder="Ej: Civil / Laboral">
+                        </div>
+                        <div class="text-end">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary">Guardar Tipo</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal fade" id="editarEtapasModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="etapas-modal-title">Editar Etapas y Vincular Plazos</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="etapas-juicio-id">
+                    <p class="text-muted small">Arrastra y suelta las etapas para reordenarlas. Selecciona un plazo procesal para cada etapa para automatizar los vencimientos en la línea de tiempo.</p>
+                    
+                    <div class="mb-3">
+                         <div class="search-container">
+                             <i class="ph ph-magnifying-glass search-icon"></i>
+                             <input type="text" id="search-plazos" class="form-control" placeholder="Buscar plazos...">
+                         </div>
+                    </div>
+                    
+                    <div id="etapas-list" class="mb-3"></div>
+                    <hr>
+                    
+                    <h6>Añadir Nueva Etapa</h6>
+                    <form id="new-etapa-form" class="row g-2 align-items-end">
+                        <div class="col-md-5">
+                            <label for="etapa-nombre" class="form-label">Nombre de la Etapa</label>
+                            <input type="text" id="etapa-nombre" class="form-control" required>
+                        </div>
+                        <div class="col-md-5">
+                            <label for="etapa-desc" class="form-label">Descripción (Opcional)</label>
+                            <input type="text" id="etapa-desc" class="form-control">
+                        </div>
+                        <div class="col-md-2"><button type="submit" class="btn btn-success w-100">Añadir</button></div>
+                    </form>
+                </div>
+                 <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" id="save-etapas-btn" class="btn btn-primary">Guardar Cambios</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="nuevoEventoModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Nuevo Evento</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="new-event-form">
+                        <div class="mb-3">
+                            <label for="event-title" class="form-label">Título</label>
+                            <input type="text" id="event-title" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="event-date" class="form-label">Fecha</label>
+                            <input type="date" id="event-date" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="event-description" class="form-label">Descripción</label>
+                            <textarea id="event-description" class="form-control" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="event-expediente" class="form-label">Vincular a Expediente (Opcional)</label>
+                            <div class="search-container">
+                                <i class="ph ph-magnifying-glass search-icon"></i>
+                                <select id="event-expediente"></select>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary">Guardar Evento</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirm-delete-title">Confirmar Eliminación</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="confirm-delete-body">¿Estás seguro de que quieres borrar esto? Esta acción no se puede deshacer.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" id="confirm-delete-btn" class="btn btn-danger">Sí, borrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="nuevoPlazoModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Añadir Nuevo Plazo Procesal</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="new-plazo-form">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="plazo-accion" class="form-label">Acción / Procedimiento</label>
+                                <input type="text" id="plazo-accion" class="form-control" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="plazo-fuero" class="form-label">Fuero</label>
+                                <select class="form-select" id="plazo-fuero" required></select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="plazo-tipo-proceso" class="form-label">Tipo de Proceso</label>
+                                <select class="form-select" id="plazo-tipo-proceso"></select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="plazo-articulo" class="form-label">Artículo</label>
+                                <input type="text" id="plazo-articulo" class="form-control">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="plazo-descripcion" class="form-label">Descripción</label>
+                            <textarea id="plazo-descripcion" class="form-control" rows="2"></textarea>
+                        </div>
+                                                <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="plazo-duracion-numero" class="form-label">Duraci?n (cantidad)</label>
+                                <input type="number" min="1" id="plazo-duracion-numero" class="form-control" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="plazo-unidad" class="form-label">Unidad</label>
+                                <select id="plazo-unidad" class="form-select">
+                                    <option value="d?as">D?as</option>
+                                    <option value="horas">Horas</option>
+                                    <option value="semanas">Semanas</option>
+                                    <option value="meses">Meses</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="plazo-tipo-duracion" class="form-label">Tipo de Duraci?n</label>
+                                <select id="plazo-tipo-duracion" class="form-select">
+                                    <option value="habiles" selected>D?as H?biles</option>
+                                    <option value="corridos">D?as Corridos</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="plazo-instancia" class="form-label">Instancia</label>
+                                <input type="text" id="plazo-instancia" class="form-control">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="plazo-notas" class="form-label">Notas</label>
+                                <input type="text" id="plazo-notas" class="form-control">
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary">Guardar Plazo</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="editarPlazoModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Editar Plazo Procesal</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="edit-plazo-form">
+                        <input type="hidden" id="edit-plazo-id">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="edit-plazo-accion" class="form-label">Acción / Procedimiento</label>
+                                <input type="text" id="edit-plazo-accion" class="form-control" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="edit-plazo-fuero" class="form-label">Fuero</label>
+                                <select class="form-select" id="edit-plazo-fuero" required></select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="edit-plazo-tipo-proceso" class="form-label">Tipo de Proceso</label>
+                                <select class="form-select" id="edit-plazo-tipo-proceso"></select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="edit-plazo-articulo" class="form-label">Artículo</label>
+                                <input type="text" id="edit-plazo-articulo" class="form-control">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-plazo-descripcion" class="form-label">Descripción</label>
+                            <textarea id="edit-plazo-descripcion" class="form-control" rows="2"></textarea>
+                        </div>
+                                                <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="edit-plazo-duracion-numero" class="form-label">Duraci?n (cantidad)</label>
+                                <input type="number" min="1" id="edit-plazo-duracion-numero" class="form-control" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="edit-plazo-unidad" class="form-label">Unidad</label>
+                                <select id="edit-plazo-unidad" class="form-select">
+                                    <option value="d?as">D?as</option>
+                                    <option value="horas">Horas</option>
+                                    <option value="semanas">Semanas</option>
+                                    <option value="meses">Meses</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="edit-plazo-tipo-duracion" class="form-label">Tipo de Duraci?n</label>
+                                <select id="edit-plazo-tipo-duracion" class="form-select">
+                                    <option value="habiles">D?as H?biles</option>
+                                    <option value="corridos">D?as Corridos</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="edit-plazo-instancia" class="form-label">Instancia</label>
+                                <input type="text" id="edit-plazo-instancia" class="form-control">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="edit-plazo-notas" class="form-label">Notas</label>
+                                <input type="text" id="edit-plazo-notas" class="form-control">
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+
+    <script src="js/utils.js" type="module"></script>
+    <script src="js/data.js" type="module"></script>
+    <script src="js/ui.js" type="module"></script>
+    <script src="js/main.js" type="module"></script>
+</body>
+</html>
+
+
+
+
+

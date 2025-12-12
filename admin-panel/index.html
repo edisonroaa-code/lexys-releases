@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Panel Admin - Licencias Lexys</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div>
+        <h1>Panel de Licencias</h1>
+        <p class="muted">Solo uso interno</p>
+      </div>
+      <div id="user-info" class="muted"></div>
+    </header>
+
+    <section id="auth-section">
+      <div class="card">
+        <h2>Acceso</h2>
+        <p class="muted small">Usa un usuario admin de Supabase o ajusta la clave service en .env</p>
+        <form id="login-form">
+          <label>Email</label>
+          <input type="email" id="email" required />
+          <label>Contraseña</label>
+          <input type="password" id="password" required />
+          <button type="submit">Ingresar</button>
+        </form>
+        <div id="login-error" class="error"></div>
+      </div>
+    </section>
+
+    <section id="data-section" class="d-none">
+      <!-- Metrics Row -->
+      <div class="card" id="metrics-card">
+        <div class="card-header">
+          <h2>Métricas Financieras (MRR)</h2>
+        </div>
+        <div class="summary-grid">
+          <div class="summary-card">
+            <p class="muted small">Licencias Activas</p>
+            <h3 id="stat-activos">0</h3>
+            <p class="muted tiny" id="stat-detalle-activos">Cargando...</p>
+          </div>
+          <div class="summary-card">
+            <p class="muted small">MRR (Ingreso Mensual Recurrente)</p>
+            <h3 id="stat-mensual">0 Gs.</h3>
+            <p class="muted tiny">Basado en planes activos</p>
+          </div>
+          <div class="summary-card">
+            <p class="muted small">ARR (Ingreso Anual Recurrente)</p>
+            <h3 id="stat-anual">0 Gs.</h3>
+            <p class="muted tiny">Proyección anual</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Planes Management Row -->
+      <div class="card" id="planes-card">
+        <div class="card-header">
+          <div>
+            <h2>Planes de Suscripción</h2>
+            <p class="muted small">Define los precios y características de tus servicios.</p>
+          </div>
+          <button id="create-plan-btn" class="btn-secondary">+ Crear Plan</button>
+        </div>
+        <div id="planes-container" class="params-grid">
+          <!-- Planes will be rendered here dynamically -->
+          <p class="muted">Cargando planes...</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2>Licencias</h2>
+            <p class="muted small">Estados y fechas por despacho</p>
+          </div>
+          <div class="actions">
+            <button id="create-license-btn" class="primary">+ Nueva Licencia</button>
+            <button id="refresh-btn">Refrescar</button>
+          </div>
+        </div>
+        <div class="filters">
+          <input type="text" id="search-input" placeholder="Buscar despacho o ID..." />
+          <select id="filter-estado">
+            <option value="">Todos los estados</option>
+            <option value="ACTIVO">ACTIVO</option>
+            <option value="PRUEBA">PRUEBA</option>
+            <option value="SUSPENDIDO">SUSPENDIDO</option>
+            <option value="EXPIRADO">EXPIRADO</option>
+          </select>
+          <select id="filter-plan">
+            <option value="">Todos los planes</option>
+            <option value="TRIAL">TRIAL</option>
+            <option value="MENSUAL">MENSUAL</option>
+            <option value="ANUAL">ANUAL</option>
+          </select>
+          <label class="checkbox-inline">
+            <input type="checkbox" id="filter-expira" />
+            <span>Solo próximos a vencer (≤7 días)</span>
+          </label>
+        </div>
+        <div id="status-msg" class="muted small"></div>
+        <div id="licencias-table"></div>
+      </div>
+    </section>
+  </div>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+
+</html>
